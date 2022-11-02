@@ -1,8 +1,9 @@
 import socket
 import time
+import requests
 
 
-def wait_for_port(port: int, host: str = "localhost", timeout: float = 5.0):
+def wait_for_server(port: int, host: str = "localhost", timeout: float = 5.0):
     """Wait until a port starts accepting TCP connections.
     Args:
         port: Port number.
@@ -15,7 +16,8 @@ def wait_for_port(port: int, host: str = "localhost", timeout: float = 5.0):
     while True:
         try:
             with socket.create_connection((host, port), timeout=timeout):
-                break
+                if requests.get(f"http://{host}:{port}/ready").status_code == 200:
+                    break
         except OSError as ex:
             time.sleep(0.01)
             if time.perf_counter() - start_time >= timeout:
